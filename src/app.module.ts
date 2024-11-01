@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
@@ -7,7 +7,7 @@ import { User } from './user/user.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -21,7 +21,7 @@ import { User } from './user/user.entity';
         database: configService.get<string>('DATABASE_NAME'),
         autoLoadEntities: false,
         synchronize: false,
-        entities: [User]
+        entities: [User],
       }),
     }),
     UserModule,
@@ -29,4 +29,11 @@ import { User } from './user/user.entity';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private configService: ConfigService) {} // Inyecta ConfigService
+
+  onModuleInit() {
+    const databaseHost = this.configService.get<string>('DATABASE_HOST');
+    console.log(`Database Host: ${databaseHost}`); // Muestra el valor en consola
+  }
+}
